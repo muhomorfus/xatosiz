@@ -1,0 +1,822 @@
+openapi: 3.0.0
+info:
+  description: API for traces
+  title: API
+  version: 1.0.0
+servers:
+- url: /
+paths:
+  /groups:
+    post:
+      operationId: CreateGroup
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateGroupResponse'
+          description: Created group info.
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Error response.
+  /groups/filter:
+    post:
+      operationId: GetGroupList
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Filters'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetGroupListResponse'
+          description: Groups info.
+  /groups/{uuid}:
+    get:
+      operationId: GetGroup
+      parameters:
+      - explode: false
+        in: path
+        name: uuid
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+          description: Group content.
+  /traces:
+    post:
+      operationId: StartTrace
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StartTraceRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StartTraceResponse'
+          description: Started trace info.
+  /traces/{uuid}:
+    put:
+      operationId: EndTrace
+      parameters:
+      - explode: false
+        in: path
+        name: uuid
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          description: Trace ended successfully.
+  /events:
+    get:
+      operationId: GetEventList
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetEventListResponse'
+          description: Event info.
+    post:
+      operationId: SendEvent
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendEventRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendEventResponse'
+          description: Event info.
+  /events/{uuid}:
+    get:
+      operationId: GetEvent
+      parameters:
+      - explode: false
+        in: path
+        name: uuid
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetEventResponse'
+          description: Event info.
+    put:
+      operationId: FixEvent
+      parameters:
+      - explode: false
+        in: path
+        name: uuid
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          description: Event fixed successfully.
+  /alert_configs:
+    get:
+      operationId: GetAlertConfigList
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetAlertConfigListResponse'
+          description: Alert config list.
+    post:
+      operationId: CreateAlertConfig
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAlertConfigRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateAlertConfigResponse'
+          description: Alert config.
+  /alert_configs/{uuid}:
+    delete:
+      operationId: DeleteAlertConfig
+      parameters:
+      - explode: false
+        in: path
+        name: uuid
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          description: Alert config deleted.
+  /alerts:
+    get:
+      operationId: GetAlertList
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetAlertListResponse'
+          description: Alert list.
+  /alerts/{uuid}:
+    delete:
+      operationId: FixAlert
+      parameters:
+      - explode: false
+        in: path
+        name: uuid
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          description: Alert fixed.
+components:
+  schemas:
+    CreateGroupResponse:
+      example:
+        uuid: uuid
+      properties:
+        uuid:
+          type: string
+      required:
+      - uuid
+      type: object
+    StartTraceRequest:
+      example:
+        component: component
+        parent_uuid: parent_uuid
+        group_uuid: group_uuid
+        title: title
+      properties:
+        group_uuid:
+          type: string
+        parent_uuid:
+          type: string
+        title:
+          type: string
+        component:
+          type: string
+      required:
+      - component
+      - title
+      type: object
+    StartTraceResponse:
+      example:
+        component: component
+        parent_uuid: parent_uuid
+        start: start
+        group_uuid: group_uuid
+        end: end
+        finished: true
+        title: title
+        uuid: uuid
+      properties:
+        uuid:
+          type: string
+        group_uuid:
+          type: string
+        parent_uuid:
+          type: string
+        start:
+          type: string
+        end:
+          type: string
+        title:
+          type: string
+        component:
+          type: string
+        finished:
+          type: boolean
+      required:
+      - component
+      - end
+      - finished
+      - start
+      - title
+      - uuid
+      type: object
+    SendEventRequest:
+      example:
+        component: component
+        trace_uuid: trace_uuid
+        payload:
+          key: payload
+        group_uuid: group_uuid
+        message: message
+        priority: priority
+      properties:
+        group_uuid:
+          type: string
+        trace_uuid:
+          type: string
+        message:
+          type: string
+        component:
+          type: string
+        priority:
+          type: string
+        payload:
+          additionalProperties:
+            type: string
+          type: object
+      required:
+      - component
+      - message
+      - priority
+      type: object
+    Event:
+      example:
+        trace_uuid: trace_uuid
+        payload:
+          key: payload
+        fixed: true
+        time: time
+        message: message
+        priority: priority
+        uuid: uuid
+      properties:
+        uuid:
+          type: string
+        trace_uuid:
+          type: string
+        message:
+          type: string
+        priority:
+          type: string
+        fixed:
+          type: boolean
+        time:
+          type: string
+        payload:
+          additionalProperties:
+            type: string
+          type: object
+      required:
+      - fixed
+      - message
+      - payload
+      - priority
+      - time
+      - trace_uuid
+      - uuid
+      type: object
+    SendEventResponse:
+      $ref: '#/components/schemas/Event'
+    GetEventListResponse:
+      example:
+        items:
+        - trace_uuid: trace_uuid
+          payload:
+            key: payload
+          fixed: true
+          time: time
+          message: message
+          priority: priority
+          uuid: uuid
+        - trace_uuid: trace_uuid
+          payload:
+            key: payload
+          fixed: true
+          time: time
+          message: message
+          priority: priority
+          uuid: uuid
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/Event'
+          type: array
+      required:
+      - items
+      type: object
+    GetEventResponse:
+      $ref: '#/components/schemas/Event'
+    Trace:
+      example:
+        component: component
+        parent_uuid: parent_uuid
+        children:
+        - null
+        - null
+        start: start
+        group_uuid: group_uuid
+        end: end
+        finished: true
+        title: title
+        uuid: uuid
+        events:
+        - trace_uuid: trace_uuid
+          payload:
+            key: payload
+          fixed: true
+          time: time
+          message: message
+          priority: priority
+          uuid: uuid
+        - trace_uuid: trace_uuid
+          payload:
+            key: payload
+          fixed: true
+          time: time
+          message: message
+          priority: priority
+          uuid: uuid
+      properties:
+        uuid:
+          type: string
+        group_uuid:
+          type: string
+        parent_uuid:
+          type: string
+        start:
+          type: string
+        end:
+          type: string
+        title:
+          type: string
+        component:
+          type: string
+        finished:
+          type: boolean
+        children:
+          items:
+            $ref: '#/components/schemas/Trace'
+          type: array
+        events:
+          items:
+            $ref: '#/components/schemas/Event'
+          type: array
+      required:
+      - children
+      - component
+      - end
+      - events
+      - finished
+      - group_uuid
+      - start
+      - title
+      - uuid
+      type: object
+    Group:
+      example:
+        traces:
+        - component: component
+          parent_uuid: parent_uuid
+          children:
+          - null
+          - null
+          start: start
+          group_uuid: group_uuid
+          end: end
+          finished: true
+          title: title
+          uuid: uuid
+          events:
+          - trace_uuid: trace_uuid
+            payload:
+              key: payload
+            fixed: true
+            time: time
+            message: message
+            priority: priority
+            uuid: uuid
+          - trace_uuid: trace_uuid
+            payload:
+              key: payload
+            fixed: true
+            time: time
+            message: message
+            priority: priority
+            uuid: uuid
+        - component: component
+          parent_uuid: parent_uuid
+          children:
+          - null
+          - null
+          start: start
+          group_uuid: group_uuid
+          end: end
+          finished: true
+          title: title
+          uuid: uuid
+          events:
+          - trace_uuid: trace_uuid
+            payload:
+              key: payload
+            fixed: true
+            time: time
+            message: message
+            priority: priority
+            uuid: uuid
+          - trace_uuid: trace_uuid
+            payload:
+              key: payload
+            fixed: true
+            time: time
+            message: message
+            priority: priority
+            uuid: uuid
+        uuid: uuid
+      properties:
+        uuid:
+          type: string
+        traces:
+          items:
+            $ref: '#/components/schemas/Trace'
+          type: array
+      required:
+      - traces
+      - uuid
+      type: object
+    Component:
+      example:
+        quantity: 0
+        name: name
+      properties:
+        name:
+          type: string
+        quantity:
+          type: integer
+      required:
+      - quantity
+      - type
+      type: object
+    Filters:
+      example:
+        component: component
+        limit: ""
+      properties:
+        limit:
+          type: int
+        component:
+          type: string
+      type: object
+    GroupPreview:
+      example:
+        duration: duration
+        components:
+        - quantity: 0
+          name: name
+        - quantity: 0
+          name: name
+        start: start
+        end: end
+        title: title
+        uuid: uuid
+        events:
+        - trace_uuid: trace_uuid
+          payload:
+            key: payload
+          fixed: true
+          time: time
+          message: message
+          priority: priority
+          uuid: uuid
+        - trace_uuid: trace_uuid
+          payload:
+            key: payload
+          fixed: true
+          time: time
+          message: message
+          priority: priority
+          uuid: uuid
+      properties:
+        uuid:
+          type: string
+        title:
+          type: string
+        duration:
+          type: string
+        start:
+          type: string
+        end:
+          type: string
+        events:
+          items:
+            $ref: '#/components/schemas/Event'
+          type: array
+        components:
+          items:
+            $ref: '#/components/schemas/Component'
+          type: array
+      required:
+      - duration
+      - end
+      - start
+      - title
+      - uuid
+      type: object
+    GetGroupListResponse:
+      example:
+        active:
+        - duration: duration
+          components:
+          - quantity: 0
+            name: name
+          - quantity: 0
+            name: name
+          start: start
+          end: end
+          title: title
+          uuid: uuid
+          events:
+          - trace_uuid: trace_uuid
+            payload:
+              key: payload
+            fixed: true
+            time: time
+            message: message
+            priority: priority
+            uuid: uuid
+          - trace_uuid: trace_uuid
+            payload:
+              key: payload
+            fixed: true
+            time: time
+            message: message
+            priority: priority
+            uuid: uuid
+        - duration: duration
+          components:
+          - quantity: 0
+            name: name
+          - quantity: 0
+            name: name
+          start: start
+          end: end
+          title: title
+          uuid: uuid
+          events:
+          - trace_uuid: trace_uuid
+            payload:
+              key: payload
+            fixed: true
+            time: time
+            message: message
+            priority: priority
+            uuid: uuid
+          - trace_uuid: trace_uuid
+            payload:
+              key: payload
+            fixed: true
+            time: time
+            message: message
+            priority: priority
+            uuid: uuid
+        fixed:
+        - duration: duration
+          components:
+          - quantity: 0
+            name: name
+          - quantity: 0
+            name: name
+          start: start
+          end: end
+          title: title
+          uuid: uuid
+          events:
+          - trace_uuid: trace_uuid
+            payload:
+              key: payload
+            fixed: true
+            time: time
+            message: message
+            priority: priority
+            uuid: uuid
+          - trace_uuid: trace_uuid
+            payload:
+              key: payload
+            fixed: true
+            time: time
+            message: message
+            priority: priority
+            uuid: uuid
+        - duration: duration
+          components:
+          - quantity: 0
+            name: name
+          - quantity: 0
+            name: name
+          start: start
+          end: end
+          title: title
+          uuid: uuid
+          events:
+          - trace_uuid: trace_uuid
+            payload:
+              key: payload
+            fixed: true
+            time: time
+            message: message
+            priority: priority
+            uuid: uuid
+          - trace_uuid: trace_uuid
+            payload:
+              key: payload
+            fixed: true
+            time: time
+            message: message
+            priority: priority
+            uuid: uuid
+      properties:
+        active:
+          items:
+            $ref: '#/components/schemas/GroupPreview'
+          type: array
+        fixed:
+          items:
+            $ref: '#/components/schemas/GroupPreview'
+          type: array
+      required:
+      - active
+      - fixed
+      type: object
+    AlertConfig:
+      example:
+        duration: duration
+        message_expression: message_expression
+        comment: comment
+        min_priority: min_priority
+        uuid: uuid
+        min_rate: 0
+      properties:
+        uuid:
+          type: string
+        message_expression:
+          type: string
+        min_priority:
+          type: string
+        duration:
+          type: string
+        min_rate:
+          type: integer
+        comment:
+          type: string
+      type: object
+    GetAlertConfigListResponse:
+      example:
+        items:
+        - duration: duration
+          message_expression: message_expression
+          comment: comment
+          min_priority: min_priority
+          uuid: uuid
+          min_rate: 0
+        - duration: duration
+          message_expression: message_expression
+          comment: comment
+          min_priority: min_priority
+          uuid: uuid
+          min_rate: 0
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/AlertConfig'
+          type: array
+      type: object
+    CreateAlertConfigRequest:
+      $ref: '#/components/schemas/AlertConfig'
+    CreateAlertConfigResponse:
+      $ref: '#/components/schemas/AlertConfig'
+    GetAlertListResponse:
+      example:
+        items:
+        - time: time
+          message: message
+          event:
+            trace_uuid: trace_uuid
+            payload:
+              key: payload
+            fixed: true
+            time: time
+            message: message
+            priority: priority
+            uuid: uuid
+          uuid: uuid
+        - time: time
+          message: message
+          event:
+            trace_uuid: trace_uuid
+            payload:
+              key: payload
+            fixed: true
+            time: time
+            message: message
+            priority: priority
+            uuid: uuid
+          uuid: uuid
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/GetAlertListResponse_items_inner'
+          type: array
+      type: object
+    Error:
+      properties:
+        error:
+          type: string
+        comment:
+          type: string
+      required:
+      - comment
+      - error
+      type: object
+    GetAlertListResponse_items_inner:
+      example:
+        time: time
+        message: message
+        event:
+          trace_uuid: trace_uuid
+          payload:
+            key: payload
+          fixed: true
+          time: time
+          message: message
+          priority: priority
+          uuid: uuid
+        uuid: uuid
+      properties:
+        uuid:
+          type: string
+        message:
+          type: string
+        time:
+          type: string
+        event:
+          $ref: '#/components/schemas/Event'
+      type: object

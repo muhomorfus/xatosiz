@@ -1,0 +1,494 @@
+openapi: 3.0.0
+info:
+  title: API
+  description: API for traces
+  version: 1.0.0
+
+paths:
+  /groups:
+    post:
+      operationId: CreateGroup
+      responses:
+        "200":
+          description: Created group info.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateGroupResponse"
+        default:
+          description: Error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /groups/filter:
+    post:
+      operationId: GetGroupList
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Filters"
+      responses:
+        "200":
+          description: Groups info.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetGroupListResponse"
+
+  /groups/{uuid}:
+    get:
+      operationId: GetGroup
+      parameters:
+        - in: path
+          name: uuid
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Group content.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Group"
+
+  /traces:
+    post:
+      operationId: StartTrace
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StartTraceRequest"
+      responses:
+        "200":
+          description: Started trace info.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StartTraceResponse"
+
+  /traces/{uuid}:
+    put:
+      operationId: EndTrace
+      parameters:
+        - in: path
+          name: uuid
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Trace ended successfully.
+
+  /events:
+    post:
+      operationId: SendEvent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendEventRequest"
+      responses:
+        "200":
+          description: Event info.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SendEventResponse"
+
+    get:
+      operationId: GetEventList
+      responses:
+        "200":
+          description: Event info.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetEventListResponse"
+
+  /events/{uuid}:
+    put:
+      operationId: FixEvent
+      parameters:
+        - in: path
+          name: uuid
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Event fixed successfully.
+
+    get:
+      operationId: GetEvent
+      parameters:
+        - in: path
+          name: uuid
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Event info.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetEventResponse"
+
+  /alert_configs:
+    get:
+      operationId: GetAlertConfigList
+      responses:
+        "200":
+          description: Alert config list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetAlertConfigListResponse"
+    post:
+      operationId: CreateAlertConfig
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAlertConfigRequest"
+      responses:
+        "200":
+          description: Alert config.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateAlertConfigResponse"
+
+  /alert_configs/{uuid}:
+    delete:
+      operationId: DeleteAlertConfig
+      parameters:
+        - in: path
+          name: uuid
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Alert config deleted.
+
+  /alerts:
+    get:
+      operationId: GetAlertList
+      responses:
+        "200":
+          description: Alert list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GetAlertListResponse"
+  /alerts/{uuid}:
+    delete:
+      operationId: FixAlert
+      parameters:
+        - in: path
+          name: uuid
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Alert fixed.
+
+components:
+  schemas:
+    CreateGroupResponse:
+      type: object
+      required:
+        - uuid
+      properties:
+        uuid:
+          type: string
+
+    StartTraceRequest:
+      type: object
+      required:
+        - title
+        - component
+      properties:
+        group_uuid:
+          type: string
+        parent_uuid:
+          type: string
+        title:
+          type: string
+        component:
+          type: string
+
+    StartTraceResponse:
+      type: object
+      required:
+        - uuid
+        - title
+        - component
+        - start
+        - end
+        - finished
+      properties:
+        uuid:
+          type: string
+        group_uuid:
+          type: string
+        parent_uuid:
+          type: string
+        start:
+          type: string
+        end:
+          type: string
+        title:
+          type: string
+        component:
+          type: string
+        finished:
+          type: boolean
+
+    SendEventRequest:
+      type: object
+      required:
+        - message
+        - component
+        - priority
+      properties:
+        group_uuid:
+          type: string
+        trace_uuid:
+          type: string
+        message:
+          type: string
+        component:
+          type: string
+        priority:
+          type: string
+        payload:
+          type: object
+          additionalProperties:
+            type: string
+
+    Event:
+      type: object
+      required:
+        - uuid
+        - trace_uuid
+        - message
+        - fixed
+        - priority
+        - time
+        - payload
+      properties:
+        uuid:
+          type: string
+        trace_uuid:
+          type: string
+        message:
+          type: string
+        priority:
+          type: string
+        fixed:
+          type: boolean
+        time:
+          type: string
+        payload:
+          type: object
+          additionalProperties:
+            type: string
+
+    SendEventResponse:
+      $ref: '#/components/schemas/Event'
+
+    GetEventListResponse:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Event'
+
+    GetEventResponse:
+      $ref: '#/components/schemas/Event'
+
+    Trace:
+      type: object
+      required:
+        - uuid
+        - group_uuid
+        - title
+        - component
+        - start
+        - end
+        - finished
+        - children
+        - events
+      properties:
+        uuid:
+          type: string
+        group_uuid:
+          type: string
+        parent_uuid:
+          type: string
+        start:
+          type: string
+        end:
+          type: string
+        title:
+          type: string
+        component:
+          type: string
+        finished:
+          type: boolean
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/Trace'
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/Event'
+
+    Group:
+      type: object
+      required:
+        - uuid
+        - traces
+      properties:
+        uuid:
+          type: string
+        traces:
+          type: array
+          items:
+            $ref: '#/components/schemas/Trace'
+
+    Component:
+      type: object
+      required:
+        - type
+        - quantity
+      properties:
+        name:
+          type: string
+        quantity:
+          type: integer
+
+    Filters:
+      type: object
+      properties:
+        limit:
+          type: int
+        component:
+          type: string
+
+    GroupPreview:
+      type: object
+      required:
+        - uuid
+        - title
+        - duration
+        - start
+        - end
+      properties:
+        uuid:
+          type: string
+        title:
+          type: string
+        duration:
+          type: string
+        start:
+          type: string
+        end:
+          type: string
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/Event'
+        components:
+          type: array
+          items:
+            $ref: '#/components/schemas/Component'
+
+    GetGroupListResponse:
+      type: object
+      required:
+        - active
+        - fixed
+      properties:
+        active:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupPreview'
+        fixed:
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupPreview'
+
+    AlertConfig:
+      type: object
+      properties:
+        uuid:
+          type: string
+        message_expression:
+          type: string
+        min_priority:
+          type: string
+        duration:
+          type: string
+        min_rate:
+          type: integer
+        comment:
+          type: string
+
+    GetAlertConfigListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/AlertConfig'
+
+    CreateAlertConfigRequest:
+      $ref: '#/components/schemas/AlertConfig'
+
+    CreateAlertConfigResponse:
+      $ref: '#/components/schemas/AlertConfig'
+
+    GetAlertListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              uuid:
+                type: string
+              message:
+                type: string
+              time:
+                type: string
+              event:
+                $ref: '#/components/schemas/Event'
+
+    Error:
+      type: object
+      required:
+        - error
+        - comment
+      properties:
+        error:
+          type: string
+        comment:
+          type: string
